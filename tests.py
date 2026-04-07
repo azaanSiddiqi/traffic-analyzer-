@@ -1,5 +1,4 @@
 """
-tests.py — Unit tests for sniffer.py
 
 Run with:  python -m pytest tests.py -v
            python tests.py          (no pytest needed)
