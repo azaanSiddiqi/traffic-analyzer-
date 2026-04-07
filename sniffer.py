@@ -1,13 +1,4 @@
 """
-sniffer.py — Core packet capture and parsing module.
-
-Captures live network traffic using Scapy and extracts:
-  - Source / destination IP and port
-  - Protocol (TCP, UDP, ICMP, ARP, Other)
-  - Payload size
-  - Timestamp
-
-Usage:
   Run directly to start capturing with default settings, or import
   PacketSniffer into your own scripts.
 """
@@ -64,10 +55,6 @@ class CapturedPacket:
         )
 
 
-# ──────────────────────────────────────────────
-# TCP flag helper
-# ──────────────────────────────────────────────
-
 _TCP_FLAGS = {
     0x01: "FIN", 0x02: "SYN", 0x04: "RST",
     0x08: "PSH", 0x10: "ACK", 0x20: "URG",
@@ -76,10 +63,6 @@ _TCP_FLAGS = {
 def _parse_tcp_flags(flag_int: int) -> str:
     return "/".join(name for bit, name in _TCP_FLAGS.items() if flag_int & bit)
 
-
-# ──────────────────────────────────────────────
-# Packet parsing
-# ──────────────────────────────────────────────
 
 def parse_packet(pkt: Packet) -> Optional[CapturedPacket]:
     """
@@ -154,10 +137,6 @@ def parse_packet(pkt: Packet) -> Optional[CapturedPacket]:
         size=size,
     )
 
-
-# ──────────────────────────────────────────────
-# Sniffer class
-# ──────────────────────────────────────────────
 
 class PacketSniffer:
     """
@@ -236,10 +215,6 @@ class PacketSniffer:
         """Discard all stored packets."""
         self.packets.clear()
 
-
-# ──────────────────────────────────────────────
-# Quick standalone demo
-# ──────────────────────────────────────────────
 
 if __name__ == "__main__":
     import argparse
