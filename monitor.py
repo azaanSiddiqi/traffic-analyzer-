@@ -1,14 +1,4 @@
 """
-monitor.py — Real-time network monitor with statistics and alerts.
-
-Builds on sniffer.py to provide:
-  - Live protocol breakdown
-  - Top talkers (busiest source IPs)
-  - Traffic volume over time
-  - Port scan detection (basic heuristic)
-  - Configurable alerts
-  - Optional JSON log export
-
 Run:
   sudo python monitor.py
   sudo python monitor.py --iface eth0 --alert-threshold 100 --log logs/traffic.json
@@ -24,11 +14,6 @@ from typing import Optional
 
 from sniffer import PacketSniffer, CapturedPacket
 
-
-# ──────────────────────────────────────────────
-# Alert definitions
-# ──────────────────────────────────────────────
-
 @dataclass
 class Alert:
     timestamp:   float
@@ -40,11 +25,6 @@ class Alert:
     def __str__(self) -> str:
         ts = time.strftime("%H:%M:%S", time.localtime(self.timestamp))
         return f"[{ts}] ⚠  {self.level:<8} {self.category}: {self.description}"
-
-
-# ──────────────────────────────────────────────
-# Statistics engine
-# ──────────────────────────────────────────────
 
 class TrafficStats:
     """Thread-safe accumulator for packet-level statistics."""
@@ -88,7 +68,6 @@ class TrafficStats:
             while self._window and self._window[0][0] < cutoff:
                 self._window.popleft()
 
-    # ── computed properties ───────────────────
 
     @property
     def bytes_per_second(self) -> float:
@@ -103,7 +82,6 @@ class TrafficStats:
             return total / elapsed
 
     def top_talkers(self, n: int = 5) -> list[tuple[str, int, int]]:
-        """Return the top N source IPs by packet count: [(ip, packets, bytes), ...]"""
         with self._lock:
             ranked = sorted(
                 self.src_ip_packets.items(),
@@ -113,7 +91,7 @@ class TrafficStats:
             return [(ip, pkts, self.src_ip_bytes[ip]) for ip, pkts in ranked[:n]]
 
     def top_ports(self, n: int = 5) -> list[tuple[int, int]]:
-        """Return the top N destination ports by hit count: [(port, count), ...]"""
+      
         with self._lock:
             ranked = sorted(
                 self.dst_port_counts.items(),
@@ -123,11 +101,7 @@ class TrafficStats:
             return ranked[:n]
 
     def port_scan_candidates(self, min_unique_ports: int = 15) -> list[tuple[str, int]]:
-        """
-        Simple heuristic: a source that has hit >= min_unique_ports distinct
-        destination ports in the current session may be port-scanning.
-        Returns [(src_ip, unique_port_count), ...]
-        """
+  
         with self._lock:
             return [
                 (ip, len(ports))
@@ -136,7 +110,7 @@ class TrafficStats:
             ]
 
     def snapshot(self) -> dict:
-        """Return a JSON-serialisable summary."""
+     
         with self._lock:
             return {
                 "timestamp":       time.time(),
@@ -148,10 +122,6 @@ class TrafficStats:
                 "top_ports":       self.top_ports(),
             }
 
-
-# ──────────────────────────────────────────────
-# Alert engine
-# ──────────────────────────────────────────────
 
 class AlertEngine:
     """Checks stats and fires alerts when thresholds are crossed."""
@@ -209,9 +179,6 @@ class AlertEngine:
         return new_alerts
 
 
-# ──────────────────────────────────────────────
-# Display helpers
-# ──────────────────────────────────────────────
 
 def _fmt_bytes(n: int) -> str:
     for unit in ("B", "KB", "MB", "GB"):
@@ -276,10 +243,6 @@ def print_dashboard(stats: TrafficStats, alerts: list[Alert]) -> None:
 
     print("\n  [Ctrl+C to stop]\n")
 
-
-# ──────────────────────────────────────────────
-# Main monitor loop
-# ──────────────────────────────────────────────
 
 class NetworkMonitor:
     """
@@ -351,10 +314,6 @@ class NetworkMonitor:
             if self.log_file:
                 print(f"[*] Log written to: {self.log_file}")
 
-
-# ──────────────────────────────────────────────
-# Entry point
-# ──────────────────────────────────────────────
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Real-time network monitor")
