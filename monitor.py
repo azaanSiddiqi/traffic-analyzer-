@@ -1,4 +1,5 @@
 """
+Learned JSON files, applied threading and OS understanding
 Run:
   sudo python monitor.py
   sudo python monitor.py --iface eth0 --alert-threshold 100 --log logs/traffic.json
